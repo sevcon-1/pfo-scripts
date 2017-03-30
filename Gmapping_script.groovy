@@ -21,7 +21,9 @@ import oracle.odi.domain.project.finder.IOdiCKMFinder;
 // Must be Run while attached to repository
 //assert odiInstance.isClosed()
 
-File mappingFile = new File('Z:\\SBCI\\DEV\\tmp\\groovyBuilder\\simple_map_builder_def.txt')
+//File mappingFile = new File('Z:\\SBCI\\DEV\\tmp\\groovyBuilder\\simple_map_builder_def.txt')
+File mappingFile = new File('Z:\\SBCI\\DEV\\tmp\\groovyBuilder\\CUTDOWN_sbci_source_stage_mapping.txt')
+
 // Stick mapping in a list
 
 // Set the tx up
@@ -54,14 +56,30 @@ def createExp(DatastoreComponent tgtDSC, OdiDataStore tgtTable, String propertyN
 }
 
 Map srcDsMap = [:]
+joinList = []
+sameMap = 1
 mappingFile.eachLine{line ->
+    
     lt = line.tokenize("\t")
     //println "${lt[0]}"
     
     //get mapping line info
     //s = getLineMatch(lt[0], "header")
     //if (r) {
-	if (lt[0] == "header") {
+    
+    if (lt[0] == 'END') {
+        //Convention to signal end of mapping spec
+        sameMap = 0
+		//Commit prev transaction and start a new one
+		tm.commit(txnStatus)
+		txnStatus = tm.getTransaction(txnDef)
+    
+    }
+    
+    
+    if (lt[0] == "header") {
+      //Reset flag to indicate in the same mapping
+      sameMap = 1
       //println "value of r is ${r}"
       // Extract mapping, project, folder etc and build mapping
       // Check number of elements is OK
@@ -71,96 +89,109 @@ mappingFile.eachLine{line ->
       ff = (IOdiFolderFinder)tme.getFinder(OdiFolder.class)
       
       //println(lt[1])
-	  project = pf.findByCode(lt[1])
+      project = pf.findByCode(lt[1])
       
       //println(lt[2])
       folderColl = ff.findByName(lt[2], lt[1])
       
       //Check only one folder exists
       assert folderColl.size() == 1// : folderColl.size()
-	  
-	  OdiFolder folder = null
+      
+      OdiFolder folder = null
       folder = folderColl.iterator().next()
-	  
-	  map = new Mapping(lt[3], folder)
+      
+      map = new Mapping(lt[3], folder)
       tme.persist(map)
       
     }
     
-	
+    
     if (lt[0] == "source") {
       
       srcDs = getDataStore lt[1], lt[2]
       
       //println (srcDs().getName())
-	  srcDatastoreC  = (DatastoreComponent) map.createComponent("DATASTORE",srcDs(), false);
+      srcDatastoreC  = (DatastoreComponent) map.createComponent("DATASTORE",srcDs(), false);
       
-	  //Add to a #map for future use
-	  srcDsMap[lt[3]] = srcDatastoreC
-	  outconn = srcDatastoreC.getOutputPoint()
-	  
-	  //bon = srcDatastoreC.getBoundObjectName()
-	  //println("bound object name is: ${bon}")
+      //Add to a #map for future use
+      srcDsMap[lt[3]] = srcDatastoreC
+      outconn = srcDatastoreC.getOutputPoint()
+      
+      //bon = srcDatastoreC.getBoundObjectName()
+      //println("bound object name is: ${bon}")
     }
     
-	if (lt[0] == "join") {
-	  
-	  fromDs = srcDsMap[lt[1]]
-	  toDs = srcDsMap[lt[2]]
-	  joinCond = lt[3]
-	  
-	  println "joining from ${fromDs} to ${toDs}"
-	  
-	  srcJoin = JoinComponent.joinSources("JOIN_DATA", fromDs, toDs, joinCond)
-	  
-	  
-	}
-	
     if (lt[0] == "target") {
       
       tgtDs = getDataStore lt[1], lt[2]
       
-	  tgtDatastoreC  = (DatastoreComponent) map.createComponent("DATASTORE",tgtDs(), false)
-	  tgtDatastoreC.setIntegrationType(lt[4])
-	  
+      tgtDatastoreC  = (DatastoreComponent) map.createComponent("DATASTORE",tgtDs(), false)
+      tgtDatastoreC.setIntegrationType(lt[4])
+      
       //println (tgtDs().getName())
       //objMap["source"] = srcDs
-	  
-	  outconn.connectTo(tgtDatastoreC)
+      
+      // This has to be the last connector placed on the mapping
+      outconn.connectTo(tgtDatastoreC)
     }
-	
+    
+    
+    if (lt[0] == "join") {
+      
+      //Get all joins into a list and process after the fact? That way final connector can be added...
+      fromDs = srcDsMap[lt[1]]
+      toDs = srcDsMap[lt[2]]
+      joinCond = lt[3]
+      
+      println "joining from ${fromDs} to ${toDs}"
+      
+      srcJoin = JoinComponent.joinSources("JOIN_DATA", fromDs, toDs, joinCond)
+      joinList.push(srcJoin)
+      
+      //srcJoin.connectReferencedSourcesToJoin()
+      
+      //joinOutConn = srcJoin.getOutputPoint()
+      
+      //joinOutConn.connectTo(tgtDatastoreC)
+      
+      
+    }
+    
     if (lt[0] == "mapping") {
-	  
-	  createExp(tgtDatastoreC, tgtDs(), lt[1], lt[2])
-	  
+      
+      createExp(tgtDatastoreC, tgtDs(), lt[2], lt[1])
+      
     }
 
     if (lt[0] == "physical") {
-	  
-	  physTgtDesign = map.getPhysicalDesigns()
       
-	  // Tee up KMs
-	  ikm = ((IOdiIKMFinder)tme.getFinder(OdiIKM.class)).findGlobalByName(lt[1]);
-	  
-	  physTgtDesign.each {
-	      apNodes = it.getAllAPNodes()
-		  tgtNodes = it.getTargetNodes()
-		  apNodes.each { 
-		                 println it.getLKMName()
-		  }
+      physTgtDesign = map.getPhysicalDesigns()
+      
+      // Tee up KMs
+      ikm = ((IOdiIKMFinder)tme.getFinder(OdiIKM.class)).findGlobalByName(lt[1]);
+      
+      physTgtDesign.each {
+          apNodes = it.getAllAPNodes()
+          tgtNodes = it.getTargetNodes()
+          apNodes.each { 
+                         println it.getLKMName()
+          }
           tgtNodes.each{
                         println it.getIKMName()
-						it.setIKM(ikm)
+                        it.setIKM(ikm)
           }
-	  }
+      }
 
-	
-	}
-	
-	
-}
+    
+    }
+    
+        
 
-	tm.commit(txnStatus)
+} // End Mapping File Read
+
+//println joinList.size()
+
+    tm.commit(txnStatus)
 
 //println (tgtDs().getName())
 //println (srcDs().getName())
