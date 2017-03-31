@@ -53,6 +53,38 @@ println aL()
 
 //println lfs.grep{ it == "e" }
 
+// Catch an error from a closure
+def clos = {p ->
+  if (p==1) {
+    //try {force_error()} catch (Exception e) {      e.printStackTrace() }
+	force_error()
+    
+  }
+  if (p==2) {
+    int one = 2
+    println "good def 1"
+  }
+  if (p==3) {
+    int one = 3
+    println "good def 2"
+  }
+
+  
+}
+
+l = [1, 2,3]
+
+l.each {
+    try {
+        clos(it)      
+    }
+    catch (Exception e) {
+      println "In the catch"
+	  e.printStackTrace()
+      
+    }
+
+}
 
 
 
