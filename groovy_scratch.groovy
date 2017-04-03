@@ -86,5 +86,58 @@ l.each {
 
 }
 
+// String Replacement
+//s = 'IKM#This_is_the_IKM'
+s = 'IKM#DEFAULT'
 
+println s.substring(s.indexOf('#')+1).replaceAll('_',' ')
 
+// String replacement and a closure within a closure
+//test call for this : groovy scratch first IKM#DEFAULT IKM#NOT_DEFAULT
+def setPhysicalLine = {
+                       return {
+					           def km = {i-> return {args[i].substring(args[i].indexOf('#')+1).replaceAll('_',' ')}}
+							   lkm = km(1)
+							   ikm = km(2)
+                               def l = "physical\t${lkm()}\t${ikm()}"
+					 }
+}
+
+p = setPhysicalLine()
+println p()
+
+// Simple Case statement
+println args[0]
+switch (args[0]) {
+    case "STAGING": 
+        srcIdx = 1; break;
+        tgtIdx = 2; break;
+    case "FINAL": 
+        srcIdx = 2; break;
+        tgtIdx = 3; break;
+	default: println "Error: Cannot determine source and target"; return;
+}
+println "After the Case"
+
+// Case in a closure returning list 
+/*
+println args[0]
+def c = { stage ->
+    return {
+	    def idxL = []
+        switch (stage) {
+            case stage: 
+                idxL[0] = 1; 
+                idxL[1] = 2; break;
+            case stage: 
+                idxL[0] = 2; 
+                idxL[1] = 3; break;
+        	default: println "Error: Cannot determine source and target"; return;
+        }
+	    return idxL
+    }
+}
+s = c(args[0])
+println s()
+//println "After the Case"
+*/
