@@ -16,10 +16,8 @@ import groovy.transform.Field
 // Check correct number of args supplied
 @Field final int argsSize = 9
 
-//assert args.size() == 9 : "Incorrect number of arguments supplied (${args.size()})\r\nCorrect usage is: OdiMappingBuilder <url> <driver> <schama> <pwd> <workrep> <odiuser> <odipwd> <project> <folder> <iname> <control_file>\r\n\r\n"
-
 if (args.size() != argsSize) {
-    println "Error: Incorrect number of arguments supplied (${args.size()} instead of ${argsSize})\r\nCorrect usage is: OdiMappingBuilder <url> <driver> <schama> <pwd> <workrep> <odiuser> <odipwd> <project> <folder> <iname> <control_file>\r\n\r\n"
+    println "Error: Incorrect number of arguments supplied (${args.size()} instead of ${argsSize})\r\nCorrect usage is: generateMapFile <project name> <odi folder> <source model> <target model> <integration type> <integration layer> <LKM> <IKM> <control_file>\r\n\r\n"
 	return
 	}
 //File specFile = new File('Z:\\SBCI\\DEV\\tmp\\groovyBuilder\\mapping_spec.txt')
@@ -45,26 +43,6 @@ def setPhysicalLine = {
 }
 
 p = setPhysicalLine()
-//println p()
-
-/*
-def stageIdxL = { stage ->
-    return {
-	    def idxL = []
-        switch (stage) {
-            case "STAGING": 
-                idxL[0] = 1; 
-                idxL[1] = 2; break;
-            case "FINAL": 
-                idxL[0] = 2; 
-                idxL[1] = 3; break;
-        	default: println "Error: Cannot determine source and target"; return;
-        }
-	    return idxL
-    }
-}
-*/
-//stgIdxsL = c(args[5])
 
 def sourceTargetL = { stage ->
     return {
@@ -81,9 +59,6 @@ def sourceTargetL = { stage ->
 	    return tabL
     }
 }
-
-//println s()
-//println "After the Case"
 
 //Mapping to hold source and target tables
 tableM = [source : '', staging : '', target : '', journal : '']
@@ -106,7 +81,6 @@ contentsL.eachWithIndex {fLine, idx ->
 	  
 	  //Push ending onto out List if not first time through
 	  if (!firstPass) { 
-					   //println p(); 
 					   outL.push(p())
 					   outL.push("END")
 	  }
@@ -114,7 +88,6 @@ contentsL.eachWithIndex {fLine, idx ->
 	  
 	  sourceTab = l[1]
 	  tableM['source'] = l[1]
-	  
 	  //println "Source bit"
 
 	}
@@ -136,14 +109,13 @@ contentsL.eachWithIndex {fLine, idx ->
 	}
 
     if (l[0] == "Journal Table") { 
-      //println "Section Started for ${l[1]}"
+
 	  journTab = l[1]	  
 	  tableM['journal'] = l[1]
 	  //println "Journ bit"
 	}
 
     if (l[0] == "Data Dictionary Id") {
-	    //println "Column Listing Section!"
 		//println "Dict bit"
 		extractOnNext = 1
 		
@@ -167,8 +139,6 @@ contentsL.eachWithIndex {fLine, idx ->
 	    header = header + "\tMAP_${ttab}"
 
 		sourceTabL = sourceTargetL(args[5])
-		//sourceLine = "source\t${args[2]}\t$stab\t$stab"
-	    //targetLine = "target\t${args[3]}\t$ttab\t$ttab\t${args[4]}"	  
 		sourceLine = "source\t${args[2]}\t${sourceTabL()[0]}\t${sourceTabL()[0]}"
 	    targetLine = "target\t${args[3]}\t${sourceTabL()[1]}\t${sourceTabL()[1]}\t${args[4]}"	  
 		
@@ -181,10 +151,13 @@ contentsL.eachWithIndex {fLine, idx ->
     if (grabMappings) {
 	    
 		if (l[2] && l[2].length() > 1) {
-		    //mapLine = "mapping\t${sourceTab}.${l[2].toUpperCase()}\t${l[3]}"
-			mapLine = "mapping\t${sourceTabL()[0]}.${l[2].toUpperCase()}\t${l[3]}"
-			//println mapLine
-			outL.push(mapLine)
+			//println "Size of this mapping line is: ${l.size()}"
+			// A source to target mapping line should have 6 members.
+			// If not then there is an on target mapping somewhere - need to work out how to handle
+			if (l.size() == 6) {
+			    mapLine = "mapping\t${sourceTabL()[0]}.${l[2].toUpperCase()}\t${l[3]}"
+			    outL.push(mapLine)
+			}
 		}
 
 	}
@@ -193,4 +166,15 @@ contentsL.eachWithIndex {fLine, idx ->
 
 outL.push(p())
 outL.push("END")
-outL.each {println it}
+
+//Print to screen if needed
+//outL.each {println it}
+
+
+//Write to file
+now = new Date()
+fileTs = now.format("yMMddkmms")
+outFname = "mapping_output_${fileTs}.txt"
+File outFile = new File("${outFname}")
+outL.each{ outFile.append("${it}\r\n") }
+println "\r\n\r\nOutput file: ${outFname}\r\n\r\n"
