@@ -1,4 +1,6 @@
 //Created by DI Studio
+//Closure Example
+/*
 def createGreeter = { name ->
   return {
     def day = new Date().getDay()
@@ -12,6 +14,7 @@ def createGreeter = { name ->
     }
   }
 }
+*/
 /*
 def greetWorld = createGreeter("World")
 greetWorld()
@@ -23,7 +26,7 @@ greetMe()
 greetYou()
 println (msg)
 */
-
+/*
 l=[]
 l = ['a','b','c','d','d','a','a','a','a']
 //l.each{ println it }
@@ -50,9 +53,9 @@ aL = cutl("a")
 println aL().getClass()
 println newL()
 println aL()
-
+*/
 //println lfs.grep{ it == "e" }
-
+/*
 // Catch an error from a closure
 def clos = {p ->
   if (p==1) {
@@ -85,13 +88,16 @@ l.each {
     }
 
 }
-
+*/
 // String Replacement
+/*
 //s = 'IKM#This_is_the_IKM'
 s = 'IKM#DEFAULT'
 
 println s.substring(s.indexOf('#')+1).replaceAll('_',' ')
+*/
 
+/*
 // String replacement and a closure within a closure
 //test call for this : groovy scratch first IKM#DEFAULT IKM#NOT_DEFAULT
 def setPhysicalLine = {
@@ -105,8 +111,10 @@ def setPhysicalLine = {
 
 p = setPhysicalLine()
 println p()
+*/
 
 // Simple Case statement
+/*
 println args[0]
 switch (args[0]) {
     case "STAGING": 
@@ -118,6 +126,7 @@ switch (args[0]) {
 	default: println "Error: Cannot determine source and target"; return;
 }
 println "After the Case"
+*/
 
 // Case in a closure returning list 
 /*
@@ -140,4 +149,53 @@ def c = { stage ->
 s = c(args[0])
 println s()
 //println "After the Case"
+*/
+
+// Ternary Operator
+/*
+def getLineMatch = {section, matcher ->
+  r = (section.toLowerCase().matches(matcher)) ? 1 : 0
+  return r
+}
+*/
+/* 
+// Get dir path - uses lastIndexOf and substring 
+p = args[0]
+File f = new File (p)
+assert f.exists()
+idx = args[0].lastIndexOf('\\')
+// Check a dir has been passed in
+assert idx != -1
+println "Index value is: ${idx}"
+//println p.substring(0, args[0].lastIndexOf('\\'))
+*/
+
+//Ternary Operator setting a file name
+/*
+def outPath
+idx = args[0].lastIndexOf('\\')
+if (idx != -1) {
+    outPath = args[0].substring(0, idx)
+	println "Out path is: ${outPath}"
+	//return
+}
+now = new Date()
+fileTs = now.format("yMMddkmms")
+//Variable = If this is true ? Variable is set to this value : Else set to this value
+//outPath ? outFname = "mapping_output_${fileTs}.txt" : outFname = "set_To_final_value"
+outFname =  outPath ? "mapping_output_${fileTs}.txt" : "set_To_final_value"
+println "Out file is called: ${outFname}"
+*/
+
+/*
+//Getting some timings
+ms = {return {System.currentTimeMillis()} }
+ns = {return {System.nanoTime()} }
+1.upto(100) {
+    t = ms()
+	println t()
+    sleep(1000)
+}
+// Timing
+//args.each {println it}
 */
