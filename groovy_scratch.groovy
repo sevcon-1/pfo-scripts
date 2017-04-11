@@ -196,6 +196,74 @@ ns = {return {System.nanoTime()} }
 	println t()
     sleep(1000)
 }
-// Timing
+// Sorting out args
 //args.each {println it}
+*/
+/*
+// Tokenize maps ??
+Map pMap = [:]
+s = 'this=that'
+l = s.tokenize("=")
+pMap[l[0]] = l[1]
+pMap.each{k, v -> println "${k} is worth ${v}"}
+*/
+/*
+//  INPUT BOILERPLATE
+println "Enter mapping spec file name in tiny box at bottom of screen:" 
+inFile = odiInputStream.withReader { it.readLine() }
+*/
+
+/*
+// Popper Closure
+l =  [1,2,3,4,5,6,7,8,9]
+
+//def popper = {elem -> return {elem.pop()}}
+def popper = {return {l.pop()}}
+a = popper(l)
+
+//l.each {println a}
+//a = l.pop()
+//println a
+//println popper(l)
+//while (popper(l)) {println popper()}
+1.upto(l.size()){
+    println (a())
+}
+//1.upto() { println a() }
+*/
+
+/*
+// Closure iteration test
+def idx = { 
+    println "In the closure"
+	return {
+        println "In the return closure"
+		def j
+		switch (v) {
+		    case "STAGING":
+			    println "Evaluting Staging";
+				j = 1;
+				break;
+		    case "FINAL":
+			    println "Evaluting FINAL";
+				j = 2;
+                break;				
+			default: println "Evaluting DEFAULT"; j = -1; 
+			
+		return j;
+		}
+	}
+}
+//i = 0
+v = args[0]
+i = idx()
+
+1.upto(10) {
+
+    //println "mod ${it} = ${it%2} "
+	println "Value of i is: ${i()}"
+	m = (it%2)
+	if (m==1) { v = "STAGING" }  else { v = "FINAL"}
+	
+}
 */
