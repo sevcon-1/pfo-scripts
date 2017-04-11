@@ -20,6 +20,16 @@ if (args.size() != argsSize) {
     println "Error: Incorrect number of arguments supplied (${args.size()} instead of ${argsSize})\r\nCorrect usage is: generateMapFile <project name> <odi folder> <source model> <target model> <integration type> <integration layer> <LKM> <IKM> <control_file>\r\n\r\n"
 	return
 	}
+
+//If directory specified then save it to write output file to otherwise none
+//"mapping_output_${fileTs}.txt"
+idx = args[8].lastIndexOf('\\')
+//println "Value if idx is: ${idx}"
+if (idx != -1) {
+    outPath = args[8].substring(0, idx)
+	println "Out path is: ${outPath}"
+	
+}
 //File specFile = new File('Z:\\SBCI\\DEV\\tmp\\groovyBuilder\\mapping_spec.txt')
 File specFile = new File(args[8])
 if (!specFile.exists()) { println "Error: Cannot find mapping file ${args[8]}"; return; }
@@ -149,13 +159,25 @@ contentsL.eachWithIndex {fLine, idx ->
     }
 	
     if (grabMappings) {
+	
+	    switch (args[5]) {
+		    case 'STAGING':		
+		        sColIdx = 2;
+		        tColIdx = 3;
+				break;
+            case 'FINAL':		
+		        sColIdx = 3;
+		        tColIdx = 4;
+				break;
+		}
 	    
 		if (l[2] && l[2].length() > 1) {
 			//println "Size of this mapping line is: ${l.size()}"
 			// A source to target mapping line should have 6 members.
 			// If not then there is an on target mapping somewhere - need to work out how to handle
 			if (l.size() == 6) {
-			    mapLine = "mapping\t${sourceTabL()[0]}.${l[2].toUpperCase()}\t${l[3]}"
+			    //mapLine = "mapping\t${sourceTabL()[0]}.${l[2].toUpperCase()}\t${l[3]}"
+				mapLine = "mapping\t${sourceTabL()[0]}.${l[sColIdx].toUpperCase()}\t${l[tColIdx]}"
 			    outL.push(mapLine)
 			}
 		}
@@ -174,7 +196,9 @@ outL.push("END")
 //Write to file
 now = new Date()
 fileTs = now.format("yMMddkmms")
-outFname = "mapping_output_${fileTs}.txt"
+
+outFname = outPath ? "${outPath}\\mapping_output_${fileTs}.txt" : "mapping_output_${fileTs}.txt"
+
 File outFile = new File("${outFname}")
 outL.each{ outFile.append("${it}\r\n") }
 println "\r\n\r\nOutput file: ${outFname}\r\n\r\n"
