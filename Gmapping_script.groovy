@@ -21,12 +21,17 @@ import oracle.odi.domain.project.finder.IOdiCKMFinder;
 
 // Must be Run while attached to repository
 //assert odiInstance.isClosed()
-
+println "Enter mapping spec file name in tiny box at bottom of screen:" 
+inFile = odiInputStream.withReader { it.readLine() }
 //File mappingFile = new File('Z:\\SBCI\\DEV\\tmp\\groovyBuilder\\simple_map_builder_def.txt')
 //File mappingFile = new File('Z:\\SBCI\\DEV\\tmp\\groovyBuilder\\CUTDOWN_sbci_source_stage_mapping.txt')
-File mappingFile = new File('Z:\\SBCI\\DEV\\tmp\\groovyBuilder\\first_cut_mapper.txt')
+//File mappingFile = new File('Z:\\SBCI\\DEV\\tmp\\groovyBuilder\\first_cut_mapper.txt')
+File mappingFile = new File(inFile)
 
-// Stick mapping in a list
+if (!mappingFile.exists()) {
+    println "Error: cannot find file: ${inFile}"
+	return
+}	
 
 // Set the tx up
 txnDef = new DefaultTransactionDefinition()
@@ -37,14 +42,8 @@ txnStatus = tm.getTransaction(txnDef)
 
 getDataStore = {model, table ->
     return {
-    //OdiDataStore ds = ((IOdiDataStoreFinder)odiInstance.getTransactionalEntityManager().getFinder(OdiDataStore.class)).findByName(table, model);
     OdiDataStore ds = ((IOdiDataStoreFinder)odiInstance.getTransactionalEntityManager().getFinder(OdiDataStore.class)).findByName(table, model);
     }
-}
-
-def getLineMatch = {section, matcher ->
-  r = (section.toLowerCase().matches(matcher)) ? 1 : 0
-  return r
 }
 
 def sectionStatus = { i -> return { i } }
@@ -62,6 +61,7 @@ def createExp(DatastoreComponent tgtDSC, OdiDataStore tgtTable, String propertyN
 def setMsgStatus = {i -> 
                 return {
 				    //println (i) 
+					def r
 				    if (i=="E") { return r = "Error" }
                     if (i=="W") { return r = "Warning" }
 				    if (i=="M") { return r = "Message" }
@@ -99,6 +99,7 @@ mappingFile.eachLine{line ->
 		//Commit prev transaction and start a new one
 		tm.commit(txnStatus)
 		txnStatus = tm.getTransaction(txnDef)
+		goFlag = sectionStatus(1)
     
     }
     
@@ -133,11 +134,13 @@ mappingFile.eachLine{line ->
 	  }
       catch (Exception e) {
 	      goFlag = sectionStatus(0)
-		  //println (goFlag())
-	      printSectionMsg("E", "MAPPING", lt[3]) 
+		  //println "Caught Exception"
+	      //err = e.printStackTrace()
+		  e.printStackTrace()
+		  printSectionMsg("E", "MAPPING", lt[3])
 		  //println ("Error creating mapping ${lt[3]}")
 	  }
-	  //println "Continuing"
+	  println "Continuing"
       
     }
     
@@ -214,6 +217,7 @@ mappingFile.eachLine{line ->
         if (lt[0] == "mapping") {
           
             try {
+			//println "Length of this mapping line is: ${lt.size()}"
 		        createExp(tgtDatastoreC, tgtDs(), lt[2], lt[1])
 			}
 			catch (Exception e) {
@@ -225,25 +229,33 @@ mappingFile.eachLine{line ->
         }
         
         if (lt[0] == "physical") {
-          
-          physTgtDesign = map.getPhysicalDesigns()
-          
-          // Tee up KMs
-          ikm = ((IOdiIKMFinder)tme.getFinder(OdiIKM.class)).findGlobalByName(lt[1]);
-          
-          physTgtDesign.each {
-              apNodes = it.getAllAPNodes()
-              tgtNodes = it.getTargetNodes()
-              apNodes.each { 
-                             println it.getLKMName()
-              }
-              tgtNodes.each{
-                            println it.getIKMName()
-                            it.setIKM(ikm)
-              }
-          }
-    
-    
+            
+			def ikm
+			def lkm
+		
+            physTgtDesign = map.getPhysicalDesigns()
+            
+            // Tee up KMs
+            // Convention is that the "physical" line must have entries in position 1 and 2. The word DEFAULT takes the place of a default choice
+		    if (lt[1] != "DEFAULT") {
+		        lkm = ((IOdiIKMFinder)tme.getFinder(OdiIKM.class)).findGlobalByName(lt[1]);
+		    }
+		    
+                    if (lt[2] != "DEFAULT") {
+		        ikm = ((IOdiIKMFinder)tme.getFinder(OdiIKM.class)).findGlobalByName(lt[2]);
+		    }
+            
+            physTgtDesign.each {
+                apNodes = it.getAllAPNodes()
+                tgtNodes = it.getTargetNodes()
+                apNodes.each { 
+                               println it.getLKMName()
+                }
+                tgtNodes.each{
+                              //println it.getIKMName()
+                              if (ikm) {it.setIKM(ikm)}
+                }
+            }
         }
     }
         
