@@ -161,6 +161,10 @@ iterateExpressions = {
 
 
 iterator = mappingFileL.size()
+1.upto(iterator) {
+    iterateExpressions()
+}
+/*
 if (wildcardInd) {
     1.upto(iterator) {
 		iterateExpressions()
@@ -179,18 +183,21 @@ if (wildcardInd) {
 }
 else {
     mappingFileL.each {
-	                    nextLine = mappingFileL.pop()
-		                specL = nextLine.tokenize(",")
-	                    mapC = getMappings(specL[0], specL[1]) //THIS IS THE ORIGINAL LINE
-			            mapC.each {
-                            map = it
-				            println "About to create expression"
-        		            //createExpression()
-                        }
+	                   //iterateExpressions()
+					   println "In the solo loop"
+					   iterateExpressions()
+	                    //nextLine = mappingFileL.pop()
+		                //specL = nextLine.tokenize(",")
+	                    //mapC = getMappings(specL[0], specL[1]) //THIS IS THE ORIGINAL LINE
+			            //mapC.each {
+                        //    map = it
+				        //    println "About to create expression"
+        		        //    createExpression()
+                        //}
 	}
 					   
 }
-
+*/
 
 //mappingFile.each {
 //    specL = it.tokenize(",")
