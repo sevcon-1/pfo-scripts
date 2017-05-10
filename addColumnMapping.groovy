@@ -74,49 +74,24 @@ getMapping = {projCode, mapName ->
 getMappings = {projCode, objName ->
 	return {
 	
-	//if (projCode.substring(0,1) == "*") {pcode = projCode}
-    //projCode.substring(0,1) == "*" ? ((pcode = projCode.drop(1)) && (obj = setFolder(pcode, objName))) : ((pcode = projCode) && (obj = objName))
 	if (projCode.substring(0,1) == "*") {
-	    //pcode = projCode.drop(1)
 		obj = setFolder(projCode.drop(1), objName)
-		//assert obj().getClass() == "X"
-		//mappingC = ((IMappingFinder)tme.getFinder(Mapping.class)).findByName(setFolder(projCode.drop(1), objName)[0], projCode.drop(1));
-		//mappingC = ((IMappingFinder)tme.getFinder(Mapping.class)).findByName(projCode.drop(1), obj()[0]);
 		mappingC = obj()[0].getMappings()
-//		mappingC.each {println "Mapping is: ${it}" }
-		//mappingC.each {println it.getClass() }
-		//m = obj()[0]
-		//println m.getName()
-		//assert 1==0
     }
 	else {
 		mappingC = ((IMappingFinder)tme.getFinder(Mapping.class)).findByName(objName, projCode);
 	}
 
-	//def obj = 
-	//mappingC = ((IMappingFinder)tme.getFinder(Mapping.class)).findByName(obj, pcode);
 	return mappingC
-	
-	//if (projCode.substring(0,1)=="*") {
-	//    mapC = ((IMappingFinder)tme.getFinder(Mapping.class)).findByName(projCode.substring(1), objName);	
-	//}
-	//else {
-	//    mapC = ((IMappingFinder)tme.getFinder(Mapping.class)).findByName(projCode);	
-	//}
-
-	 
     }
 }
 
 
 
 // Set expression 
-def createExp(DatastoreComponent tgtDSC, OdiDataStore tgtTable, String propertyName, String expressionText) throws Exception { 
+def setExp(DatastoreComponent tgtDSC, OdiDataStore tgtTable, String propertyName, String expressionText) throws Exception { 
   DatastoreComponent.findAttributeForColumn(tgtDSC,tgtTable.getColumn(propertyName)).setExpressionText(expressionText)
 }
-
-// get first line to check if this is a wildcard change
-mappingFileL[0].substring(0,1) == "*" ? (wildcardInd = true) : (wildcardInd = false)
 
 createExpression = {specLineL ->
 
@@ -125,31 +100,21 @@ createExpression = {specLineL ->
         tgtNodes = it.getTargetNodes()
 	}
 	
-	//assert mapC().size() == 1
-	
     //
 	tgtNodes.each { 
 		lc =  it.getLogicalComponent()
 		
 		// Bound datastore
 		bds = lc.getBoundDataStore()
-		
-		println "Mapping ${specL[2]} for ${map.getName()}"
-		//createExp lc, bds, specL[2], specL[3]
-		createExp lc, bds, specLineL[2], specLineL[3]
-		
 
-		//println lc.getClass()
-
+		setExp lc, bds, specLineL[2], specLineL[3]
 		}
 }		
 
 iterateExpressions = {
                       nextLine = mappingFileL.pop()
                       specL = nextLine.tokenize(",")
-                      println specL
-		              mapC = getMappings(specL[0], specL[1]) //THIS IS THE ORIGINAL LINE
-                      println "Size of Mapc is ${mapC().size()}"
+		              mapC = getMappings(specL[0], specL[1])
                       // now have a list of mappings
                       mapC().each {
                                  map = it
@@ -159,82 +124,10 @@ iterateExpressions = {
 }					  
 
 
-
+// This is the main call to do the expression mapping
 iterator = mappingFileL.size()
 1.upto(iterator) {
     iterateExpressions()
 }
-/*
-if (wildcardInd) {
-    1.upto(iterator) {
-		iterateExpressions()
-		// Now set the expressions
-//		mapC = getMappings(specL[0], specL[1]) //THIS IS THE ORIGINAL LINE
-//
-//        // now have a list of mappings
-//        mapC.each {
-//                   map = it
-//				   println "About to create expression"
-//        		     //createExpression()
-//        }
-	}
-	
-	             
-}
-else {
-    mappingFileL.each {
-	                   //iterateExpressions()
-					   println "In the solo loop"
-					   iterateExpressions()
-	                    //nextLine = mappingFileL.pop()
-		                //specL = nextLine.tokenize(",")
-	                    //mapC = getMappings(specL[0], specL[1]) //THIS IS THE ORIGINAL LINE
-			            //mapC.each {
-                        //    map = it
-				        //    println "About to create expression"
-        		        //    createExpression()
-                        //}
-	}
-					   
-}
-*/
-
-//mappingFile.each {
-//    specL = it.tokenize(",")
-//	
-//	//This bit to make the mapping file generic or mapping specific
-//	//specL[1] == "*" ? getMappings(specL[0]) specL[1] : getMapping(specL[0], specL[1])
-//	// get mapping based on project and name
-//	mapC = getMappings(specL[0], specL[1]) //THIS IS THE ORIGINAL LINE
-//    println "Mapping list has ${mapC().size()} entries"
-//	
-//	//popper idea?
-//	//map = mapC()[0]
-//	map = mapC().pop()
-//	println map.getClass()
-//	// get physical nodes - to drive target datastore
-//	physTgtDesign = map.getPhysicalDesigns()
-//	physTgtDesign.each {
-//        tgtNodes = it.getTargetNodes()
-//	}
-//	
-//	//assert mapC().size() == 1
-//	
-//    //
-//	tgtNodes.each { 
-//		lc =  it.getLogicalComponent()
-//		
-//		// Bound datastore
-//		bds = lc.getBoundDataStore()
-//		
-//		println "Mapping ${specL[2]} for ${map.getName()}"
-//		//createExp lc, bds, specL[2], specL[3]
-//
-//		//println lc.getClass()
-//
-//		}
-//    
-//	
-//}
 
 tm.commit(txnStatus)
