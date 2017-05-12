@@ -1,0 +1,3 @@
+<% if ( odiRef.getOption("LOG_DATASET").equals("1") ){ %>
+// Load of stuff here
+<% } %>
