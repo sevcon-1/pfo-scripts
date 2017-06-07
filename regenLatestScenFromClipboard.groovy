@@ -20,15 +20,6 @@ import oracle.odi.domain.project.OdiInterface;
 import oracle.odi.core.security.Authentication 
 
 
-String workRep = "";
-String Url = "jdbc:oracle:thin:@";
-String Driver="oracle.jdbc.OracleDriver";
-String Master_User="";
-String Master_Pass="";
-String projCode="";
-String Odi_User="";
-String Odi_Pass="";
-
 //Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 
 //StringSelection str = new StringSelection( "This is some text" );
@@ -52,14 +43,6 @@ if ( bIsText ) {
 
   try {
 
-    MasterRepositoryDbInfo masterInfo = new MasterRepositoryDbInfo(Url, Driver, Master_User,Master_Pass.toCharArray(), new PoolingAttributes());
-    WorkRepositoryDbInfo workInfo = new WorkRepositoryDbInfo(workRep, new PoolingAttributes());
-    
-    OdiInstance odiInstance=OdiInstance.createInstance(new OdiInstanceConfig(masterInfo,workInfo));
-    
-    Authentication auth = odiInstance.getSecurityManager().createAuthentication(Odi_User,Odi_Pass.toCharArray());
-    odiInstance.getSecurityManager().setCurrentThreadAuthentication(auth);
-
     txnDef = new DefaultTransactionDefinition(); 
     tm = odiInstance.getTransactionManager() ;
     txnStatus = tm.getTransaction(txnDef);
@@ -79,14 +62,11 @@ if ( bIsText ) {
         sTag = (sc =~ /(.\w*)\s.*/) [ 0 ] [ 1 ]
         println "Regenerating: "+sTag
         gene.regenerateLatestScenario(sTag);
-        odiInstance.getTransactionalEntityManager().persist(newScen);
 //        println l.get(i);
              
     }
     
     tm.commit(txnStatus);
-    auth.close();
-    odiInstance.close();
 
 
 
