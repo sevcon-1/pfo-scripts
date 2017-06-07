@@ -267,3 +267,21 @@ i = idx()
 	
 }
 */
+
+// Splitting a string with the letter as a delimiter
+// Not sure why it works
+//s = "ABDE"
+//
+//s.split(/\W*/).each { 
+//
+//    println "it has a value of ${it}"
+//    switch(it) {
+//        case "D":
+//            println ("Value is D")
+//            break;
+//        default:
+//            println "Illegal value"
+//            break;
+//    }
+//}
+*/
