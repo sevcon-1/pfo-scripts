@@ -24,7 +24,8 @@ import oracle.odi.domain.model.OdiDataStore;
 //assert !odiInstance.isClosed()
 
 println "Enter mapping spec file name in tiny box at bottom of screen:" 
-//inFile = odiInputStream.withReader { it.readLine() }
+inFile = odiInputStream.withReader { it.readLine() }
+def mappingFileL = new File(inFile).collect {it};
 //File mappingFile = new File('Z:\\SBCI\\DEV\\tmp\\groovyBuilder\\simple_map_builder_def.txt')
 //File mappingFile = new File('Z:\\SBCI\\DEV\\tmp\\groovyBuilder\\CUTDOWN_sbci_source_stage_mapping.txt')
 //File mappingFile = new File('Z:\\SBCI\\DEV\\tmp\\groovyBuilder\\first_cut_mapper.txt')
@@ -35,7 +36,8 @@ println "Enter mapping spec file name in tiny box at bottom of screen:"
 //    println "Error: cannot find file: ${inFile}"
 //	return
 //}
-def mappingFileL = new File('Z:\\SBCI\\DEV\\tmp\\filespecs\\add_mapping.csv').collect {it};
+
+//def mappingFileL = new File('Z:\\SBCI\\DEV\\tmp\\filespecs\\add_mapping.csv').collect {it};
 
 // Map datastore columns on target
 txnDef = new DefaultTransactionDefinition()
