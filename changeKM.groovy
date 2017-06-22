@@ -63,6 +63,9 @@ loopSpec = {
 	
         //loopSpec()
 		nextLine = mappingFileL.pop()
+		
+		if (nextLine[0]=="!") { continue; } 
+		
         specL = nextLine.tokenize(",")
 		//mapC = getMapping(specL[0], specL[2])
 		mapC = ((IMappingFinder)tme.getFinder(Mapping.class)).findByName(specL[2], specL[0]);
