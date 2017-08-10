@@ -55,7 +55,14 @@ def sectionL = {section ->
 }
 
 def createExp(DatastoreComponent tgtDSC, OdiDataStore tgtTable, String propertyName, String expressionText) throws Exception { 
-  DatastoreComponent.findAttributeForColumn(tgtDSC,tgtTable.getColumn(propertyName)).setExpressionText(expressionText)
+  try {
+       DatastoreComponent.findAttributeForColumn(tgtDSC,tgtTable.getColumn(propertyName)).setExpressionText(expressionText)
+	   println "Mapped: ${expressionText}"
+	   }
+  catch (e) {
+      //println org.codehaus.groovy.runtime.StackTraceUtils.sanitize(new Exception(e)).printStackTrace()
+	  println "Error mapping ${expressionText}"
+  }
 }
 
 def setMsgStatus = {i -> 
@@ -164,6 +171,7 @@ mappingFile.eachLine{line ->
           	}
             catch (Exception e) {
 	            goFlag = sectionStatus(0)
+				e.printStackTrace()
 	            printSectionMsg("E", lt[0], lt[3]) 
 				//println ("Error creating mapping ${lt[3]}")
 	        }
@@ -187,6 +195,7 @@ mappingFile.eachLine{line ->
 			}
             catch (Exception e) {
 	            goFlag = sectionStatus(0)
+				e.printStackTrace()
 	            printSectionMsg("E", lt[0], lt[3]) 
 
 	        }
@@ -218,11 +227,13 @@ mappingFile.eachLine{line ->
           
             try {
 			//println "Length of this mapping line is: ${lt.size()}"
-		        createExp(tgtDatastoreC, tgtDs(), lt[2], lt[1])
+		        println "createExp -> ${lt[2]}, ${lt[1]})"
+				createExp(tgtDatastoreC, tgtDs(), lt[2], lt[1])
 			}
 			catch (Exception e) {
 			    goFlag = sectionStatus(0)
-	            printSectionMsg("E", lt[0], "mapping ${tgtDs}: ${lt[2]} to ${lt[1]}") 
+	            e.printStackTrace()
+				//printSectionMsg("E", lt[0], "mapping ${tgtDs}: ${lt[2]} to ${lt[1]}") 
 			}
 		  
           
