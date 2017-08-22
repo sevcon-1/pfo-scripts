@@ -285,3 +285,25 @@ i = idx()
 //    }
 //}
 */
+/*
+// Regex Example - but of pattern matching with a closure
+s = '               <listen-port>20019</listen-port>            '
+//s = '     <listen-port>20019</listen-port> '
+println s.getClass()
+//m = s=~/\s*<start>/
+/*
+m = s=~/\s+<listen-port>20019</
+m.eachWithIndex{i, v -> println "${i} = ${v}"}
+//println s
+*/
+//regex = /(\s+)<listen-port>20019/
+//regex = /^\s+(<listen-port>)\s*(\d+)</
+( s =~ /(\s+)(<listen-port>)(20019)</).each {match, lead, tag, port ->
+//( s =~ regex).each {match, tag, port ->
+//( s =~ regex).each {match, port ->
+    println "Match: ${match}"
+    println "Lead spaces: ${lead}"
+    println "Tag: ${tag}"
+    println "Port Number: ${port}"
+}
+*/
