@@ -66,15 +66,16 @@ getMapping = {projCode, mapName ->
 		    physTgtDesign = map.getPhysicalDesigns()
 		    
 		    physTgtDesign.each {
-			    switch (specL[4]) {
+			    //println specL[4]
+				switch (specL[4]) {
                     
 					case "IKMOPT":
 
     			        OdiIKM projectIKM = (OdiIKM) ((IOdiKMFinder) odiInstance.getTransactionalEntityManager().getFinder(OdiIKM.class)).findGlobalByName(specL[5]).toArray()[0];
                         
-				        physTgtDesign = map.getPhysicalDesigns()
+				        //physTgtDesign = map.getPhysicalDesigns()
                         
-				        physTgtDesign.each {
+				        //physTgtDesign.each {
                                   
             	            physNodes = it.getPhysicalNodes()
 				            physNodes.each {
@@ -83,14 +84,40 @@ getMapping = {projCode, mapName ->
     	                        if (ikm != null && ikm == projectIKM) {
                                             IOptionValue odiMapOption = node.getIKMOptionValue(specL[3]);
                                             if (odiMapOption != null) {
-				                	            println "Setting option ${specL[3]} for mapping ${map.getName()} on node ${node.getName()}"
+				                	            println "Setting option ${specL[3]} to ${specL[6]} for mapping ${map.getName()} on node ${node.getName()}"
                                                 odiMapOption.setValue(specL[6]);
                                             }
                                 }
 				            }
-            	        }
+            	        //}
 						break;
-				    default: 
+					case "CKMOPT":
+
+    			        OdiCKM globalCKM = (OdiCKM) ((IOdiKMFinder) odiInstance.getTransactionalEntityManager().getFinder(OdiCKM.class)).findGlobalByName(specL[5]).toArray()[0];
+                        
+				        //physTgtDesign = map.getPhysicalDesigns()
+                        
+				        //physTgtDesign.each {
+                                  
+            	            physNodes = it.getPhysicalNodes()
+				            physNodes.each {
+				                node = it
+				                OdiCKM ckm = (OdiCKM) node.getCheckKM();
+    	                        if (ckm != null && ckm == globalCKM) {
+                                            IOptionValue odiMapOption = node.getCheckKMOptionValue(specL[3]);
+                                            if (odiMapOption != null) {
+				                	            println "Setting option ${specL[3]} to ${specL[6]} for mapping ${map.getName()} on node ${node.getName()}"
+                                                odiMapOption.setValue(specL[6]);
+                                            }
+                                }
+				            }
+            	        //}
+						break;						
+					case "OPTCONT":
+                        println "Setting optimization context to ${specL[3]} for ${map.getName()}"
+                        it.setOptimizationContextByCode(specL[3])
+						break;						
+				    default:
 				        tgtNodes = it.getTargetNodes()
                         
 			            tgtNodes.each {
@@ -101,7 +128,6 @@ getMapping = {projCode, mapName ->
                         
 				            attr = lc.findOutputAttribute(specL[3]) 
 				        	//assert attr.getClass() == "String"
-				        	
 							switch (specL[4]) {
            	                    //Unique Keys - Unset all the existing keys then set those specified
 							    case "UK":
@@ -145,10 +171,16 @@ getMapping = {projCode, mapName ->
 							    case "NNIND":
 							        println "Processing Not Null Indicator for ${map.getName()}.${attr.getName()}"
                                     // Set Not Nullable if 1 else nullable
-									
 									specL[5] as int ? attr.setCheckNotNullIndicator(true) : attr.setCheckNotNullIndicator(false)
 							    	break;
-									
+							    case "UDFLAG":
+									udflag = "UD_${specL[5]}"
+							        println "Setting UD Flag ${udflag} to ${specL[6]} for ${map.getName()}.${attr.getName()}"
+									//pv = attr.getStringPropertyValue(udflag)
+									value =  specL[6].toBoolean()
+									attr.setBooleanPropertyValue(udflag, value)
+
+							    	break;
 								default: println ("Unknown value for ${map.getName()} entry: ${specL[4]}")
     							         break;
 							}

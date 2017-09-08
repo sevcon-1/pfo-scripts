@@ -19,6 +19,12 @@ import oracle.odi.domain.model.OdiDataStore;
 //import oracle.odi.domain.project.finder.IOdiCKMFinder;
 
 
+/*
+
+//*SBCI_MIS,LMS,AMENDED_BY,'<%=odiRef.getSession("ODI_USER_NAME")%>'
+
+*/
+
 
 // Must be Run while attached to repository
 //assert !odiInstance.isClosed()
@@ -109,6 +115,7 @@ createExpression = {specLineL ->
 		// Bound datastore
 		bds = lc.getBoundDataStore()
 
+		println "Setting ${lc.getBoundObjectName()}.${specLineL[2]} to ${specLineL[3]}"
 		setExp lc, bds, specLineL[2], specLineL[3]
 		}
 }		
@@ -116,11 +123,12 @@ createExpression = {specLineL ->
 iterateExpressions = {
                       nextLine = mappingFileL.pop()
                       specL = nextLine.tokenize(",")
+					  println specL
 		              mapC = getMappings(specL[0], specL[1])
                       // now have a list of mappings
                       mapC().each {
                                  map = it
-		              		     println "About to create expression"
+		              		     println specL
                       		     createExpression(specL)
                       }
 }					  
